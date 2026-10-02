@@ -1,7 +1,8 @@
 // register controller 
 import User from "../models/user.model.js";
+import bcrypt from "bcrypt";
 
-const registerUser = async(req,res)=>{
+export const registerUser = async(req,res)=>{
     try{
         const {name , email , username , password} = req.body;
 
@@ -24,17 +25,45 @@ const registerUser = async(req,res)=>{
         if (emailExists){
             return res.status(400).json({message:"Email already exists"});
         }
+        
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
 
-        const newUser = User.create({
-            name, username, email, password
+        const newUser = await User.create({
+            name, username, email, password : hashedPassword 
         })
 
-        res.status(201).json({message:"User registered successfully", user:newUser});
+        res.status(201).json({
+            message:"User registered successfully",
+            user: {
+                _id: newUser._id,
+                name: newUser.name,
+                username: newUser.username,
+                email: newUser.email,
+                password: newUser.password,
+            }
+        });
 
 
 
     }catch(error){
          res.status(500).json({message:"Server error", error:error.message});
+    }
+} 
+
+export const loginUser = async(req,res)=>{
+    try{
+       const {email , password} = req.body;
+
+       if(!email || !password){
+        return res.status(400).json({message:"All fields are required"});
+       }
+       const user = await User.findOne({email});
+       if(!user){
+        return res.status(400).json({message:"User not found"});
+       }
+    } catch(error){
+
     }
 
     
