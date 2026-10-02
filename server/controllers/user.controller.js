@@ -1,6 +1,11 @@
 // register controller 
 import User from "../models/user.model.js";
 import bcrypt from "bcrypt";
+import { genToken } from "../utils/genToken.js";
+
+const cookieOptions = {
+    httponly: true
+} 
 
 export const registerUser = async(req,res)=>{
     try{
@@ -32,6 +37,8 @@ export const registerUser = async(req,res)=>{
         const newUser = await User.create({
             name, username, email, password : hashedPassword 
         })
+        const token = genToken(newUser._id);
+        res.cookie("token", token, cookieOptions);
 
         res.status(201).json({
             message:"User registered successfully",
@@ -60,10 +67,18 @@ export const loginUser = async(req,res)=>{
        }
        const user = await User.findOne({email});
        if(!user){
-        return res.status(400).json({message:"User not found"});
+        return res.status(404).json({message:"User not found"});
        }
-    } catch(error){
 
+       const passwordMatched = await bcrypt.compare(password, user.password);
+       if(!passwordMatched){
+        return res.status(401).json({message:"Invalid credentials"});
+       }
+       console.log("User logged in successfully");
+       res.status(200).json({message: 'User logged in'}) 
+
+    } catch(error){
+        res.status(500).json({message:"Server error", error:error.message});
     }
 
     
