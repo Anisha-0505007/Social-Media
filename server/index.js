@@ -13,6 +13,7 @@ const app = express();
 const PORT =  8001;
 
 app.use(express.json()); // to parse json data from request body
+app.use(cookieParser()); // to parse cookies from request headers    
 
 // connect to database
 mongoose.connect(process.env.dbUrl).then(()=>{

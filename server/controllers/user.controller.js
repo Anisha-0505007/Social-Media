@@ -84,3 +84,20 @@ export const loginUser = async(req,res)=>{
     
 
 }
+
+export const getMe = async(req,res)=>{
+    try{
+        const user = req.user; // get user details from request object
+        res.status(200).json({
+            message:"User details",
+            user: {
+                _id: user._id,
+                name: user.name,
+                username: user.username,
+                email: user.email
+            }
+        });
+    } catch(error){
+        res.status(500).json({message:"Server error", error:error.message});
+    }   
+}
