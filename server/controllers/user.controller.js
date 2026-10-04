@@ -1,7 +1,7 @@
 // register controller 
 import User from "../models/user.model.js";
 import bcrypt from "bcrypt";
-import { genToken } from "../utils/genToken.js";
+import genToken from "../utils/generateToken.js";
 
 const cookieOptions = {
     httponly: true
@@ -50,6 +50,9 @@ export const registerUser = async(req,res)=>{
                 password: newUser.password,
             }
         });
+        console.log("User registered successfully");
+        
+       
 
 
 
