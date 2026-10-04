@@ -1,27 +1,45 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from 'react'
+import { axiosInstance } from '../axioscalls/axios'
 
-const AuthContext = createContext(null);
+const AuthContext = createContext(null)
 
-export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
+export const AuthProvider = ({ children }) => {
+    const [user, setUser] = useState(null)
+    const [loading, setLoading] = useState(true)
 
-  const logout = () => {
-    setUser(null);
-  };
+    useEffect(() => {
+        let mounted = true
 
-  return (
-    <AuthContext.Provider value={{ user, setUser, logout }}>
-      {children}
-    </AuthContext.Provider>
-  );
+        const fetchUser = async () => {
+            try {
+                const response = await axiosInstance.get('/users/me')
+                if (!mounted) return
+                setUser(response.data)
+            } catch (error) {
+                if (!mounted) return
+                setUser(null)
+            } finally {
+                if (mounted) setLoading(false)
+            }
+        }
+
+        fetchUser()
+
+        return () => {
+            mounted = false
+        }
+    }, [])
+
+    const logout = async () => {
+        await axiosInstance.post('/users/logout')
+        setUser(null)
+    }
+
+    return (
+        <AuthContext.Provider value={{ user, setUser, loading, logout }}>
+            {children}
+        </AuthContext.Provider>
+    )
 }
 
-export function useAuth() {
-  const context = useContext(AuthContext);
-
-  if (!context) {
-    throw new Error("useAuth must be used inside AuthProvider");
-  }
-
-  return context;
-}
+export const useAuth = () => useContext(AuthContext)
