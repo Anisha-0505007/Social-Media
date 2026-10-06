@@ -128,3 +128,19 @@ export const getUserProfile = async(req,res)=>{
       res.status(500).json({message:"Server error", error:error.message});
     }
 }
+
+export const followUser = async(req,res)=>{
+    try{
+        const currentUserId = req.user._id;
+        const targetUserId = req.params.id;
+        if (currentUserId.toString() === targetUserId.toString()) return res.status(409).json({ message: "You cannot follow yourself" });
+        const targetUser = await User.findById(targetUserId);
+        if (!targetUser) return res.status(404).json({ message: "No Target User Found" });
+        if (targetUser.followers.some((id) => id.toString() === currentUserId.toString())) return res.status(409).json({ message: "You are already following this user" });
+        await User.findByIdAndUpdate(currentUserId, { $addToSet: { followings: targetUserId } });
+        await User.findByIdAndUpdate(targetUserId, { $addToSet: { followers: currentUserId } });
+        return res.status(200).json({ message: "User followed" });
+    }catch(error){
+        res.status(500).json({message:"Server error", error:error.message});
+    }
+}
