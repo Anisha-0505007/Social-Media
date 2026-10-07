@@ -2,6 +2,7 @@
 import User from "../models/user.model.js";
 import bcrypt from "bcrypt";
 import genToken from "../utils/generateToken.js";
+import uploadToCloudinary from "../utils/uploadToCloudinary.js";
 
 const cookieOptions = {
     httponly: true
@@ -161,11 +162,56 @@ export const unfollowUser = async (req, res) => {
     }
 };
 
-export const testUpload = (req,res) =>{
+export const testUpload = async(req,res) =>{
     try{
-       res.send(req.file)
+        const uploadedimage = await uploadToCloudinary(req.file.buffer)
+       res.send(uploadedimage.secure_url) 
     }
     catch(error){
         res.status(500).json({message:"Server error", error:error.message});
     }
 }
+
+
+export const updateProfile = async (req, res, next) => {
+    try {
+        const userId = req.user._id;
+        const { name, username, email, bio } = req.body;
+
+        if (!name?.trim() || !username?.trim() || !email?.trim()) {
+            return res.status(400).json({ message: "Name, username and email are required" });
+        }
+
+        const cleanUsername = username.trim();
+        const normalizedEmail = email.trim().toLowerCase();
+
+        if (await User.findOne({ username: cleanUsername, _id: { $ne: userId } })) {
+            return res.status(409).json({ message: "Username already exists" });
+        }
+
+        if (await User.findOne({ email: normalizedEmail, _id: { $ne: userId } })) {
+            return res.status(409).json({ message: "Email already exists" });
+        }
+
+        const updates = {
+            name: name.trim(),
+            username: cleanUsername,
+            email: normalizedEmail,
+            bio: bio?.trim() || ""
+        };
+
+        if (req.file) {
+            const uploadedImage = await uploadToCloudinary(req.file.buffer);
+            updates.profileImage = uploadedImage.secure_url;
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(userId, updates, {
+            new: true,
+            runValidators: true
+        }).select("-password");
+
+        return res.status(200).json({ message: "Profile updated successfully", user: updatedUser });
+    } catch (error) {
+        next(error);
+    }
+};

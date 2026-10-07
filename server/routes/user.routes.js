@@ -9,6 +9,7 @@ userRoutes.get('/me', isAuthenticated, getMe)
 userRoutes.get('/profile/:username', isAuthenticated, getUserProfile)
 userRoutes.post('/:id/follow', isAuthenticated, followUser)
 userRoutes.post('/:id/unfollow', isAuthenticated, unfollowUser)
+userRoutes.post('/updateProfile', upload.single('profileImage'), isAuthenticated, updateProfile)
 
 userRoutes.post('/testUpload', isAuthenticated, upload.single('profileImage')) 
 
