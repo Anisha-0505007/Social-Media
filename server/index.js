@@ -8,6 +8,8 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 
 import userRoutes from "./routes/user.routes.js";
+import postRoutes from "./routes/post.routes.js";
+import reelRoutes from "./routes/reel.routes.js";
 
 dotenv.config();
 
@@ -34,6 +36,8 @@ mongoose.connect(process.env.dbUrl).then(()=>{
 });
 
 app.use('/users', userRoutes);
+app.use('/posts', postRoutes);
+app.use('/reels', reelRoutes);
 
 app.get('/',(req,res)=>{
     res.send('Server is running');
