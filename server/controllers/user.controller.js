@@ -115,7 +115,7 @@ export const getMe = async(req,res)=>{
 export const getUserProfile = async(req,res)=>{
     try{
        const {username} = req.params;
-       const user = await User.findOne({username}).select("-password");
+       const user = await User.findOne({username}).select("-password").populate("followers", "name username profileImage").populate("followings", "name username profileImage");
        if(!user){
         return res.status(404).json({message:"User not found"});
        }
@@ -144,3 +144,19 @@ export const followUser = async(req,res)=>{
         res.status(500).json({message:"Server error", error:error.message});
     }
 }
+
+export const unfollowUser = async (req, res) => {
+    try {
+        const currentUserId = req.user._id;
+        const targetUserId = req.params.id;
+        if (currentUserId.toString() === targetUserId.toString()) return res.status(409).json({ message: "You cannot unfollow yourself" });
+        const targetUser = await User.findById(targetUserId);
+        if (!targetUser) return res.status(404).json({ message: "No Target User Found" });
+        await User.findByIdAndUpdate(currentUserId, { $pull: { followings: targetUserId } });
+        await User.findByIdAndUpdate(targetUserId, { $pull: { followers: currentUserId } });
+        return res.status(200).json({ message: "User unfollowed" });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+};
