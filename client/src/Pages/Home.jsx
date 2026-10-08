@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { axiosInstance } from "../axioscalls/axios";
 import { useDispatch } from "react-redux";
-import { setPosts } from "../redux/postSlice";
+import { setPosts } from "../redux/postsSlice";
 
 
 

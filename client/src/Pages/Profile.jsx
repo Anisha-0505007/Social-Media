@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
-import axiosInstance from '../axiosCalls/axios'
+import { axiosInstance } from '../axioscalls/axios'
 import { useAuth } from '../context/AuthContext'
 import { fetchPostsByUsername, selectPostsByUsername, updatePostLike } from '../redux/postsSlice'
 import { fetchReelsByUsername, selectReelsByUsername } from '../redux/reelsSlice'
@@ -227,7 +227,7 @@ function Profile() {
         }
     }
 
-    if (loading) {
+    if (loading && !userData) {
         return (
             <div className="flex justify-center items-center min-h-[400px]">
                 <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600"></div>
@@ -398,9 +398,9 @@ function Profile() {
                 </div>
 
                 {activeContentTab === 'posts' ? (
-                    postsLoading ? (
+                    postsLoading && profilePosts.length === 0 ? (
                         <p className="py-8 text-center text-sm text-gray-500">Loading posts...</p>
-                    ) : postsError ? (
+                    ) : postsError && profilePosts.length === 0 ? (
                         <p className="py-8 text-center text-sm text-red-500">{postsError}</p>
                     ) : profilePosts.length === 0 ? (
                         <div className="rounded-xl border border-dashed border-gray-200 py-10 text-center">
@@ -447,9 +447,9 @@ function Profile() {
                         </div>
                     )
                 ) : (
-                    reelsLoading ? (
+                    reelsLoading && profileReels.length === 0 ? (
                         <p className="py-8 text-center text-sm text-gray-500">Loading reels...</p>
-                    ) : reelsError ? (
+                    ) : reelsError && profileReels.length === 0 ? (
                         <p className="py-8 text-center text-sm text-red-500">{reelsError}</p>
                     ) : profileReels.length === 0 ? (
                         <div className="rounded-xl border border-dashed border-gray-200 py-10 text-center">
