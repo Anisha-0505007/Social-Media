@@ -63,3 +63,19 @@ export const getStoriesByUsername = async (req, res) => {
        return res.status(500).json({ message: "Error fetching stories", error });
     }
 }
+
+export const deleteStory = async (req, res) => {
+    try {
+        const story = await Story.findById(req.params.id);
+        if (!story) {
+            return res.status(404).json({ message: "Story not found" });
+        }
+        if (story.author.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ message: "You are not the owner of this story" });
+        }
+        await Story.findByIdAndDelete(req.params.id);
+        res.status(200).json({ message: "Story deleted successfully" });
+    } catch (error) {
+        res.status(500).json({ message: "Error deleting story", error });
+    }
+}

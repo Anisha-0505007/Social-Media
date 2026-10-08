@@ -16,4 +16,10 @@ storyRoutes.get(
     getStoriesByUsername
 );
 
+storyRoutes.delete(
+    "/deleteStory/:id",
+    isAuthenticated,
+    deleteStory
+);
+
 export default storyRoutes;
